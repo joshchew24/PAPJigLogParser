@@ -1,6 +1,7 @@
 import sys
 import re
 
+### FUNCTIONS
 def isNotFluff(line):
     # return false if contains any of these 4 keywords, 
     removeIfContains = ["Sending", "Writing", "Received", "Raising"]
@@ -34,11 +35,25 @@ def formatToTemps(line):
 
     return time + " " + temp + "\n"
 
+def formatToCSV(line):
+    timePattern = re.compile("\\d\\d:\\d\\d:\\d\\d,\\d{3}")
+    timeMatch = timePattern.search(line)
+    timeWithComma = timeMatch.group()
+    time = timeWithComma.replace(",", ".")
 
+    tempPattern = re.compile(" controller: \\d{1,3}\\.\\d{3}  corrected: \\d{1,3}\\.\\d{3}")
+    tempMatch = tempPattern.search(line)
+    tempWithLabels = tempMatch.group()
+    tempWithCorrectedLabel = tempWithLabels.replace(" controller: ", ",")
+    temp = tempWithCorrectedLabel.replace("  corrected: ", ",")
+
+
+    return time + temp + "\n"
+
+
+### Main Code
 if len(sys.argv) != 2:
      exit("Usage: \'python parser.py arg1\'\narg1 is the path/filename of .log file to be parsed.")
-
-
 
 file = sys.argv[1]
 
@@ -59,16 +74,17 @@ f.close()
 
 date = filename[4:12]
 
-trimmed = open(date + "-TRIMMED.log", "w")
-tempLog = open(date + "-temps.log", "w")
+trimmed = open("outputs/" + date + "-TRIMMED.log", "w")
+tempLog = open("outputs/" + date + "-temps.log", "w")
+tempCSV = open("outputs/" + date + "-temps.csv", "w")
 
 for line in lines:
     if isNotFluff(line):
         trimmed.write(line)
     if containsTempDataPoint(line):
         tempLog.write(formatToTemps(line))
-        #tempCsv.write(formatToCSV(line))
+        tempCSV.write(formatToCSV(line))
 
 trimmed.close()
 tempLog.close()
-
+tempCSV.close()
