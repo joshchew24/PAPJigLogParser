@@ -13,11 +13,31 @@ def isNotFluff(line):
             return False
     # return false if line is too short
     return len(line) > 8
-# print ('Number of arguments:', len(sys.argv), 'arguments.')
-# print ('Argument List:', str(sys.argv))
+
+def containsTempDataPoint(line):
+    pattern = re.compile("controller: \\d{1,3}\\.\\d{3}  corrected: \\d{1,3}\\.\\d{3}")
+    found = pattern.search(line)
+    if not found:
+        return False
+    else: 
+        return True
+
+def formatToTemps(line):
+    timePattern = re.compile("\\d\\d:\\d\\d:\\d\\d,\\d{3}")
+    timeMatch = timePattern.search(line)
+    timeWithComma = timeMatch.group()
+    time = timeWithComma.replace(",", ".")
+
+    tempPattern = re.compile(" controller: \\d{1,3}\\.\\d{3}  corrected: \\d{1,3}\\.\\d{3}")
+    tempMatch = tempPattern.search(line)
+    temp = tempMatch.group()
+
+    return time + " " + temp + "\n"
+
 
 if len(sys.argv) != 2:
      exit("Usage: \'python parser.py arg1\'\narg1 is the path/filename of .log file to be parsed.")
+
 
 
 file = sys.argv[1]
@@ -39,20 +59,16 @@ f.close()
 
 date = filename[4:12]
 
-o = open(date + "-test.log", "w")
+trimmed = open(date + "-TRIMMED.log", "w")
+tempLog = open(date + "-temps.log", "w")
+
 for line in lines:
     if isNotFluff(line):
-        o.write(line)
+        trimmed.write(line)
+    if containsTempDataPoint(line):
+        tempLog.write(formatToTemps(line))
+        #tempCsv.write(formatToCSV(line))
 
-o.close()
-
-
-# with open(file, "r") as f:
-#     lines = f.readlines()
-
-
-# with open(file, "w") as f:
-#     for line in lines:
-#         if line.strip("\n") != "bonk":
-#             f.write(line)
+trimmed.close()
+tempLog.close()
 
