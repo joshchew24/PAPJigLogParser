@@ -1,4 +1,5 @@
-import numpy as np
 import pandas as pd
 
-df = pd.readcsv()
+def plot(filename):
+    df = pd.read_csv(filename)
+    print(df[0])

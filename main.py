@@ -1,9 +1,10 @@
 import sys
 import re
 import parser as p
+import grapher as g
 
 if len(sys.argv) != 2:
-     exit("Usage: \'python parser.py arg1\'\narg1 is the path/filename of .log file to be parsed.")
+     exit("Usage: \'main.py arg1\'\narg1 is the path/filename of .log file to be parsed.")
 
 file = sys.argv[1]
 
@@ -18,7 +19,11 @@ filename = m.group()
 if (len(filename) != 16): 
     exit("Error: filename should be of format \'app_YYYYMMDD.log\'")
 
-f = open(file, "r")
+try:
+    f = open(file, "r")
+except FileNotFoundError as e:
+    quit("Error: File not found. Verify it exists in the specified directory.")
+
 lines = f.readlines()
 f.close()
 
@@ -38,3 +43,5 @@ for line in lines:
 trimmed.close()
 templog.close()
 tempCSV.close()
+
+g.plot("outputs/" + date + "-temps.csv")
