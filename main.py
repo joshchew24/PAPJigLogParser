@@ -1,7 +1,10 @@
 import sys
 import re
-import parser as p
+import log_parser as p
 import grapher as g
+
+# from parser import *
+# from grapher import *
 
 if len(sys.argv) != 2:
      exit("Usage: \'main.py arg1\'\narg1 is the path/filename of .log file to be parsed.")
@@ -44,4 +47,4 @@ trimmed.close()
 templog.close()
 tempCSV.close()
 
-g.plot("outputs/" + date + "-temps.csv")
+# g.plot("outputs/" + date + "-temps.csv")
