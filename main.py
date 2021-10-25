@@ -25,16 +25,16 @@ f.close()
 date = filename[4:12]
 
 trimmed = open("outputs/" + date + "-TRIMMED.log", "w")
-tempLog = open("outputs/" + date + "-temps.log", "w")
+templog = open("outputs/" + date + "-temps.log", "w")
 tempCSV = open("outputs/" + date + "-temps.csv", "w")
 
 for line in lines:
-    if p.isNotFluff(line):
+    if p.is_not_fluff(line):
         trimmed.write(line)
-    if p.containsTempDataPoint(line):
-        tempLog.write(p.formatToTemps(line))
-        tempCSV.write(p.formatToCSV(line))
+    if p.contains_temp_data_points(line):
+        templog.write(p.format_to_temps(line))
+        tempCSV.write(p.format_to_csv(line))
 
 trimmed.close()
-tempLog.close()
+templog.close()
 tempCSV.close()

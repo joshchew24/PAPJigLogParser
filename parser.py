@@ -1,13 +1,11 @@
-import sys
 import re
 
-### FUNCTIONS
-def isNotFluff(line):
+def is_not_fluff(line):
     # return false if contains any of these 4 keywords, 
-    removeIfContains = ["Sending", "Writing", "Received", "Raising"]
-    for key in removeIfContains:
-        keyAsRegex = re.compile(key)
-        found = keyAsRegex.search(line)
+    remove_if_contains = ["Sending", "Writing", "Received", "Raising"]
+    for key in remove_if_contains:
+        key_as_regex = re.compile(key)
+        found = key_as_regex.search(line)
         if not found:
             continue
         else: 
@@ -15,7 +13,7 @@ def isNotFluff(line):
     # return false if line is too short
     return len(line) > 8
 
-def containsTempDataPoint(line):
+def contains_temp_data_points(line):
     pattern = re.compile("controller: \\d{1,3}\\.\\d{3}  corrected: \\d{1,3}\\.\\d{3}")
     found = pattern.search(line)
     if not found:
@@ -23,68 +21,29 @@ def containsTempDataPoint(line):
     else: 
         return True
 
-def formatToTemps(line):
-    timePattern = re.compile("\\d\\d:\\d\\d:\\d\\d,\\d{3}")
-    timeMatch = timePattern.search(line)
-    timeWithComma = timeMatch.group()
-    time = timeWithComma.replace(",", ".")
+def format_to_temps(line):
+    time_pattern = re.compile("\\d\\d:\\d\\d:\\d\\d,\\d{3}")
+    time_match = time_pattern.search(line)
+    time_with_comma = time_match.group()
+    time = time_with_comma.replace(",", ".")
 
-    tempPattern = re.compile(" controller: \\d{1,3}\\.\\d{3}  corrected: \\d{1,3}\\.\\d{3}")
-    tempMatch = tempPattern.search(line)
-    temp = tempMatch.group()
+    temp_pattern = re.compile(" controller: \\d{1,3}\\.\\d{3}  corrected: \\d{1,3}\\.\\d{3}")
+    temp_match = temp_pattern.search(line)
+    temp = temp_match.group()
 
     return time + " " + temp + "\n"
 
-def formatToCSV(line):
-    timePattern = re.compile("\\d\\d:\\d\\d:\\d\\d,\\d{3}")
-    timeMatch = timePattern.search(line)
-    timeWithComma = timeMatch.group()
-    time = timeWithComma.replace(",", ".")
+def format_to_csv(line):
+    time_pattern = re.compile("\\d\\d:\\d\\d:\\d\\d,\\d{3}")
+    time_match = time_pattern.search(line)
+    time_with_comma = time_match.group()
+    time = time_with_comma.replace(",", ".")
 
-    tempPattern = re.compile(" controller: \\d{1,3}\\.\\d{3}  corrected: \\d{1,3}\\.\\d{3}")
-    tempMatch = tempPattern.search(line)
-    tempWithLabels = tempMatch.group()
-    tempWithCorrectedLabel = tempWithLabels.replace(" controller: ", ",")
-    temp = tempWithCorrectedLabel.replace("  corrected: ", ",")
+    temp_pattern = re.compile(" controller: \\d{1,3}\\.\\d{3}  corrected: \\d{1,3}\\.\\d{3}")
+    temp_match = temp_pattern.search(line)
+    temp_with_labels = temp_match.group()
+    temp_with_corrected_labels = temp_with_labels.replace(" controller: ", ",")
+    temp = temp_with_corrected_labels.replace("  corrected: ", ",")
 
 
     return time + temp + "\n"
-
-
-### Main Code
-if len(sys.argv) != 2:
-     exit("Usage: \'python parser.py arg1\'\narg1 is the path/filename of .log file to be parsed.")
-
-file = sys.argv[1]
-
-pattern = re.compile("app_20(1|2)\\d(0|1)\\d[0-3]\\d\\.log")
-m = pattern.search(file)
-
-if not m:
-    exit("Error: filename should be of format \'app_YYYYMMDD.log\'")
-
-filename = m.group()
-
-if (len(filename) != 16): 
-    exit("Error: filename should be of format \'app_YYYYMMDD.log\'")
-
-f = open(file, "r")
-lines = f.readlines()
-f.close()
-
-date = filename[4:12]
-
-trimmed = open("outputs/" + date + "-TRIMMED.log", "w")
-tempLog = open("outputs/" + date + "-temps.log", "w")
-tempCSV = open("outputs/" + date + "-temps.csv", "w")
-
-for line in lines:
-    if isNotFluff(line):
-        trimmed.write(line)
-    if containsTempDataPoint(line):
-        tempLog.write(formatToTemps(line))
-        tempCSV.write(formatToCSV(line))
-
-trimmed.close()
-tempLog.close()
-tempCSV.close()
