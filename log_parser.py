@@ -1,4 +1,18 @@
 import re
+import datetime as dt
+
+initial_time = 0
+
+def set_init_time(line):
+    rawtime = line[11:23]
+    formatted_time = rawtime.replace(",",".")
+    global initial_time
+    initial_time = convert_time_to_seconds(formatted_time)
+
+
+def convert_time_to_seconds(time):
+    h, m, s = time.split(":")
+    return float(h)*3600 + float(m)*60 + float(s)
 
 def is_not_fluff(line):
     # return false if contains any of these 4 keywords, 
@@ -38,12 +52,17 @@ def format_to_csv(line):
     time_match = time_pattern.search(line)
     time_with_comma = time_match.group()
     time = time_with_comma.replace(",", ".")
+    
+    seconds = convert_time_to_seconds(time) - initial_time
 
-    temp_pattern = re.compile(" controller: \\d{1,3}\\.\\d{3}  corrected: \\d{1,3}\\.\\d{3}")
-    temp_match = temp_pattern.search(line)
-    temp_with_labels = temp_match.group()
-    temp_with_corrected_labels = temp_with_labels.replace(" controller: ", ",")
-    temp = temp_with_corrected_labels.replace("  corrected: ", ",")
+    uncorr_pattern = re.compile(" controller: \\d{1,3}\\.\\d{3}")
+    uncorr_match = uncorr_pattern.search(line)
+    uncorrected_temp_labelled = uncorr_match.group()
+    uncorrected_temp = uncorrected_temp_labelled.replace(" controller: ","")
 
+    corr_pattern = re.compile("  corrected: \\d{1,3}\\.\\d{3}")
+    corr_match = corr_pattern.search(line)
+    corr_temp_labelled = corr_match.group()
+    corrected_temp = corr_temp_labelled.replace("  corrected: ","")
 
-    return time + temp + "\n"
+    return time + "," + str(seconds) + "," +  uncorrected_temp + "," + corrected_temp + "\n"
