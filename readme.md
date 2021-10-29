@@ -2,4 +2,9 @@
 
 ## TODO:
 - improve parser code readability
-- change name and command line usage. main does everything right now, are there cases where you would parse and not graph? or if you just want to graph an existing .csv?
+- command line: multiple functions, can process entire folder or just single files
+- graphing: more visual clarity, outputs image file OR can open in graphing viewer?
+
+
+## Usage:
+- can only graph .log files that have already been previously parsed

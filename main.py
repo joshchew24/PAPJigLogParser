@@ -1,52 +1,100 @@
+from ast import parse
 import sys
 import re
 import log_parser as p
 import grapher as g
 
-if len(sys.argv) != 2:
-     exit("Usage: \'main.py arg1\'\narg1 is the path/filename of .log file to be parsed.")
+global path
+global file
+global command
+global date
 
-file = sys.argv[1]
+def main():
+    global path
+    global command
+    if len(sys.argv) != 3:
+        exit("Usage: \'main.py <parse/graph/process> <path>/\'\narg1 is the path/filename of .log path to be parsed.")
+    command = sys.argv[1]
+    path = sys.argv[2]
+    
+    processCommand()
 
-pattern = re.compile("app_20(1|2)\\d(0|1)\\d[0-3]\\d\\.log")
-m = pattern.search(file)
 
-if not m:
-    exit("Error: filename should be of format \'app_YYYYMMDD.log\'")
+def processCommand():
+    global path
+    global command
+    
+    commandPattern = re.compile("parse|graph|process")
+    commandMatch = commandPattern.search(command)
+    if not commandMatch:
+        exit("\'" + command + "\' is not one of the valid commands: \'parse\', \'graph\', \'process\'")
 
-filename = m.group()
+    readFile()
 
-if (len(filename) != 16): 
-    exit("Error: filename should be of format \'app_YYYYMMDD.log\'")
+    if (command == "parse"):
+        parse()
+    elif (command == "graph"):
+        graph()
+    elif (command == "process"):
+        parse()
+        graph()
 
-try:
-    f = open(file, "r")
-except FileNotFoundError as e:
-    quit("Error: File not found. Verify it exists in the specified directory.")
 
-lines = f.readlines()
-f.close()
+def readFile():
+    global path
+    global file
+    global date
+    accept_csv = (command == "graph")
+    
+    pattern = re.compile("(app_20(1|2)\\d(0|1)\\d[0-3]\\d\\.log)%s" %("|(20(1|2)\\d(0|1)\\d[0-3]\\d\\-temps\\.csv)" if accept_csv else ""))
+    m = pattern.search(path)
 
-date = filename[4:12]
+    if not m:
+        exit("Error: filename should be of format \'app_YYYYMMDD.log\'. Can also graph files of format \'YYYYMMDD-temps.csv\'")
 
-trimmed = open("outputs/" + date + "-TRIMMED.log", "w")
-templog = open("outputs/" + date + "-temps.log", "w")
-tempCSV = open("outputs/" + date + "-temps.csv", "w")
+    filename = m.group()
 
-first_line_found = False
+    # useless check, matched regex will guarantee length.
+    # if (len(filename) != 16): 
+    #     exit("Error: filename should be of format \'app_YYYYMMDD.log\'")
 
-for line in lines:
-    if p.is_not_fluff(line):
-        trimmed.write(line)
-    if p.contains_temp_data_points(line):
-        if not first_line_found:
-            first_line_found = True
-            p.set_init_time(line)
-        templog.write(p.format_to_temps(line))
-        tempCSV.write(p.format_to_csv(line))
+    try:
+        file = open(path, "r")
+    except FileNotFoundError as e:
+        quit("Error: File not found. Verify it exists in the specified directory. If graphing .log files, parse them prior to graphing.")
 
-trimmed.close()
-templog.close()
-tempCSV.close()
+    date = filename[4:12]
 
-g.plot("outputs/" + date + "-temps.csv")
+
+def parse():
+    lines = file.readlines()
+    file.close()
+    
+    trimmed = open("outputs/" + date + "-TRIMMED.log", "w")
+    templog = open("outputs/" + date + "-temps.log", "w")
+    tempCSV = open("outputs/" + date + "-temps.csv", "w")
+
+    first_line_found = False
+
+    for line in lines:
+        if p.is_not_fluff(line):
+            trimmed.write(line)
+        if p.contains_temp_data_points(line):
+            if not first_line_found:
+                first_line_found = True
+                p.set_init_time(line)
+            templog.write(p.format_to_temps(line))
+            tempCSV.write(p.format_to_csv(line))
+
+    # file.close()
+    trimmed.close()
+    templog.close()
+    tempCSV.close()
+
+
+def graph():
+    g.plot("outputs/" + date + "-temps.csv")
+
+
+if __name__ == "__main__":
+    main()
