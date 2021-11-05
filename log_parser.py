@@ -9,7 +9,6 @@ def set_init_time(line):
     global initial_time
     initial_time = convert_time_to_seconds(formatted_time)
 
-
 def convert_time_to_seconds(time):
     h, m, s = time.split(":")
     return float(h)*3600 + float(m)*60 + float(s)
