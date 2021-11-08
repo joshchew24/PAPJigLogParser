@@ -1,6 +1,6 @@
 # PAPJig Log Parser
 Requires pandas 1.1.4 or higher and matplotlib 3.3.4 or higher.  
-Accepts .log files of specific format, examples provided. Work has stopped for now in this repository; switched to private BitBucket repo. Once CLI refactoring is complete, this repo will be updated for probably the last time. 
+Accepts .log files of specific format, examples to be provided. Work has stopped for now in this repository; switched to private BitBucket repo. Once CLI refactoring is complete, this repo will be updated for probably the last time. 
 
 
 ## TODO:
