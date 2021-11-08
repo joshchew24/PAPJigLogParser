@@ -30,34 +30,47 @@ def promptCommandInput():
     command = input("Enter function... ")
     parseCommand()
 
-    # if (command == help):
-    #     asdf = input("asdf")
+def parseCommand():
+    patternString = getCommandStrings()
+    commandPattern = re.compile(patternString)
+    commandMatch = commandPattern.search(command)
+    if not commandMatch:
+        print("\'" + command + "\' is not one of the valid commands: ")
+        print(*commands, sep = ', ')
+        promptCommandInput()
+    if (command == "help"): 
+        printHelp()
+        promptCommandInput()
+    if (command == "exit" or command == "q"):
+        exit("Exiting...")
 
 def promptFileInput():
     global path
     path = input("Enter file or directory to " + command + "... ")
     parseFile()
     
-
 def parseFile():
     global file
     global date
+    isGraphing = command == "graph"
     
-    pattern = re.compile("(20(1|2)\\d(0|1)\\d[0-3]\\d\\-temps\\.csv)" if (command == "graph") else "(app_20(1|2)\\d(0|1)\\d[0-3]\\d\\.log)")
+    pattern = re.compile("(20(1|2)\\d(0|1)\\d[0-3]\\d\\-temps\\.csv)" if isGraphing else "(app_20(1|2)\\d(0|1)\\d[0-3]\\d\\.log)")
     # pattern = re.compile("(app_20(1|2)\\d(0|1)\\d[0-3]\\d\\.log)%s" %("|(20(1|2)\\d(0|1)\\d[0-3]\\d\\-temps\\.csv)" if accept_csv else ""))
     m = pattern.search(path)
     
     if not m:
-        print("Error: filename should be of format \'app_YYYYMMDD.log\'. Can also graph files of format \'YYYYMMDD-temps.csv\'")
+        print("Error: filename should be of format \'YYYYMMDD-temps.csv\'" if isGraphing else "Error: filename should be of format \'app_YYYYMMDD.log\'.")
         promptFileInput()
 
     filename = m.group()
     try:
         file = open(path, "r")
     except FileNotFoundError as e:
-        exit("Exiting: File not found. Verify it exists in the specified directory. If graphing .log files, parse them prior to graphing.")
+        print("Exiting: File not found. Verify it exists in the specified directory. If graphing .log files, parse them prior to graphing.")
+        promptFileInput()
 
-    date = filename[4:12]  
+    date = filename[0:8] if isGraphing else filename[4:12]
+    print(date)
 
 def printHelp():
     print("Parse:   reads log file and generates three new versions - trimmed, and temperature data in .log and .csv format.")
@@ -78,23 +91,7 @@ def getCommandStrings():
 
     return patternString
 
-def parseCommand():
-    global path
-    global command
 
-    patternString = getCommandStrings()
-        
-    commandPattern = re.compile(patternString)
-    commandMatch = commandPattern.search(command)
-    if not commandMatch:
-        print("\'" + command + "\' is not one of the valid commands: ")
-        print(*commands, sep = ', ')
-        promptCommandInput()
-    if (command == "help"): 
-        printHelp()
-        promptCommandInput()
-    if (command == "exit" or command == "q"):
-        exit("Exiting...")
 
 def executeCommand():
     if (command == "parse"):
