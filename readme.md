@@ -1,5 +1,5 @@
 # PAPJig Log Parser
-
+Requires pandas 1.1.4 or higher and matplotlib 3.3.4 or higher
 ## TODO:
 - improve parser code readability
 - command line: multiple functions, can process entire folder or just single files
